@@ -1,2 +1,11 @@
-# roost_prototype
-React prototype for a post-graduation social connection app for young professionals transitioning to new cities. Implements event creation, group discovery, and capacity tracking flows. Proof-of-concept only — not a production application
+# prototype
+
+mkdir C:\Users\THEIRUSERNAME\AppData\Roaming\npm
+npx create-react-app roost-demo
+
+once react app is made copy code from here into the App.js in the app
+
+cd roost-demo
+npm start
+
+
