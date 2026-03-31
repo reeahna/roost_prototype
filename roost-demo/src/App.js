@@ -47,7 +47,8 @@ function RoostApp() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createType, setCreateType] = useState("event");
-  const [onboarding, setOnboarding] = useState(true);
+  // "auth" | "signin" | "signup" | "onboarding" | "app"
+  const [screen, setScreen] = useState("auth");
   const [onboardStep, setOnboardStep] = useState(0);
   const [selectedInterests, setSelectedInterests] = useState([]);
 
@@ -76,7 +77,10 @@ function RoostApp() {
   const filteredGroups = groups.filter((g) => groupCategory === "All" || g.category === groupCategory);
   const filteredEvents = events.filter((e) => eventCategory === "All" || e.category === eventCategory);
 
-  if (onboarding) return <OnboardingScreen step={onboardStep} setStep={setOnboardStep} interests={interests} selectedInterests={selectedInterests} toggleInterest={toggleInterest} finish={() => setOnboarding(false)} />;
+  if (screen === "auth") return <AuthGateScreen onSignIn={() => setScreen("signin")} onSignUp={() => setScreen("signup")} />;
+  if (screen === "signin") return <SignInScreen onBack={() => setScreen("auth")} onSuccess={() => setScreen("app")} />;
+  if (screen === "signup") return <SignUpScreen onBack={() => setScreen("auth")} onSuccess={() => setScreen("onboarding")} />;
+  if (screen === "onboarding") return <OnboardingScreen step={onboardStep} setStep={setOnboardStep} interests={interests} selectedInterests={selectedInterests} toggleInterest={toggleInterest} finish={() => setScreen("app")} />;
 
   if (showCreate) return (
     <div style={styles.phone}>
@@ -747,6 +751,155 @@ function ProfileScreen() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─── AUTH GATE ───────────────────────────────────────────── */
+function AuthGateScreen({ onSignIn, onSignUp }) {
+  return (
+    <div style={styles.phone}>
+      <div style={styles.statusBar}><span style={{ fontSize: 12, fontWeight: 600 }}>9:41</span><span style={{ fontSize: 12 }}>●●● WiFi 🔋</span></div>
+      <div style={{ flex: 1, background: COLORS.teal, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 36, gap: 24 }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 72, marginBottom: 16 }}>🐦</div>
+          <h1 style={{ color: "#fff", fontSize: 36, fontWeight: 800, margin: 0, fontFamily: "Georgia, serif", lineHeight: 1.1 }}>Roost</h1>
+          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 15, marginTop: 10, lineHeight: 1.5 }}>Find your people through local groups and events.</p>
+        </div>
+
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+          <button onClick={onSignUp} style={{ width: "100%", padding: "16px", borderRadius: 16, border: "none", background: "#fff", color: COLORS.teal, fontWeight: 800, fontSize: 16, cursor: "pointer" }}>
+            Create Account
+          </button>
+          <button onClick={onSignIn} style={{ width: "100%", padding: "16px", borderRadius: 16, border: "2px solid rgba(255,255,255,0.5)", background: "transparent", color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer" }}>
+            Sign In
+          </button>
+        </div>
+
+        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, textAlign: "center", marginTop: 8 }}>
+          By continuing you agree to our Terms & Privacy Policy
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SIGN IN ─────────────────────────────────────────────── */
+function SignInScreen({ onBack, onSuccess }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSignIn = () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Please fill in both fields.");
+      return;
+    }
+    onSuccess();
+  };
+
+  return (
+    <div style={styles.phone}>
+      <div style={styles.statusBar}><span style={{ fontSize: 12, fontWeight: 600 }}>9:41</span><span style={{ fontSize: 12 }}>●●● WiFi 🔋</span></div>
+      <div style={{ flex: 1, background: COLORS.sand, display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ background: COLORS.teal, padding: "20px 20px 32px" }}>
+          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 36, height: 36, color: "#fff", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>←</button>
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <div style={{ fontSize: 36 }}>🐦</div>
+            <h2 style={{ color: "#fff", fontFamily: "Georgia, serif", fontSize: 24, margin: "8px 0 4px" }}>Welcome back</h2>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, margin: 0 }}>Sign in to your Roost account</p>
+          </div>
+        </div>
+
+        <div style={{ padding: "24px 24px 0", display: "flex", flexDirection: "column", gap: 14, marginTop: -16 }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+            <AuthField label="Email" type="email" value={email} onChange={setEmail} placeholder="you@email.com" />
+            <div style={{ height: 1, background: COLORS.blush, margin: "12px 0" }} />
+            <AuthField label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+          </div>
+
+          {error && <div style={{ background: "#fde", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#c00", fontWeight: 600 }}>{error}</div>}
+
+          <button onClick={handleSignIn} style={{ width: "100%", padding: "16px", borderRadius: 16, border: "none", background: COLORS.clay, color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer" }}>
+            Sign In
+          </button>
+
+          <p style={{ textAlign: "center", fontSize: 13, color: "#aaa", margin: 0 }}>
+            Forgot your password?{" "}
+            <span style={{ color: COLORS.clay, fontWeight: 700, cursor: "pointer" }}>Reset it</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── SIGN UP ─────────────────────────────────────────────── */
+function SignUpScreen({ onBack, onSuccess }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSignUp = () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    onSuccess();
+  };
+
+  return (
+    <div style={styles.phone}>
+      <div style={styles.statusBar}><span style={{ fontSize: 12, fontWeight: 600 }}>9:41</span><span style={{ fontSize: 12 }}>●●● WiFi 🔋</span></div>
+      <div style={{ flex: 1, background: COLORS.sand, display: "flex", flexDirection: "column" }}>
+        <div style={{ background: COLORS.clay, padding: "20px 20px 32px" }}>
+          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 36, height: 36, color: "#fff", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>←</button>
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <div style={{ fontSize: 36 }}>🐦</div>
+            <h2 style={{ color: "#fff", fontFamily: "Georgia, serif", fontSize: 24, margin: "8px 0 4px" }}>Create Account</h2>
+            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, margin: 0 }}>Join Roost and find your people</p>
+          </div>
+        </div>
+
+        <div style={{ padding: "24px 24px 0", display: "flex", flexDirection: "column", gap: 14, marginTop: -16 }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+            <AuthField label="Full Name" type="text" value={name} onChange={setName} placeholder="Ahna Abraham" />
+            <div style={{ height: 1, background: COLORS.blush, margin: "12px 0" }} />
+            <AuthField label="Email" type="email" value={email} onChange={setEmail} placeholder="you@email.com" />
+            <div style={{ height: 1, background: COLORS.blush, margin: "12px 0" }} />
+            <AuthField label="Password" type="password" value={password} onChange={setPassword} placeholder="Min. 6 characters" />
+          </div>
+
+          {error && <div style={{ background: "#fde", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#c00", fontWeight: 600 }}>{error}</div>}
+
+          <button onClick={handleSignUp} style={{ width: "100%", padding: "16px", borderRadius: 16, border: "none", background: COLORS.clay, color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer" }}>
+            Create Account → Set Up Profile
+          </button>
+
+          <p style={{ textAlign: "center", fontSize: 12, color: "#bbb", margin: 0 }}>
+            You'll set up your interests next
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthField({ label, type, value, onChange, placeholder }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: "#999", marginBottom: 6, letterSpacing: 0.5 }}>{label.toUpperCase()}</div>
+      <input
+        type={type} value={value} placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", border: "none", outline: "none", fontSize: 15, color: COLORS.charcoal, background: "transparent", padding: 0, boxSizing: "border-box" }}
+      />
     </div>
   );
 }
